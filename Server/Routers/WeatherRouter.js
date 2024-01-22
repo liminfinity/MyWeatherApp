@@ -1,5 +1,6 @@
 const express = require('express')
 const axios = require('axios')
+const fs = require('fs')
 const weatherRouter = express.Router()
 require('dotenv').config()
 const apiWeatherKey = process.env.WEATHER_API_KEY
