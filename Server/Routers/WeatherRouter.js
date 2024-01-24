@@ -1,29 +1,27 @@
 const express = require('express')
 const axios = require('axios')
 const fs = require('fs')
-const weatherRouter = express.Router()
+const { weatherAPIFormat } = require('../additional')
 require('dotenv').config()
+const weatherRouter = express.Router()
 const apiWeatherKey = process.env.WEATHER_API_KEY
 weatherRouter.route('/')
             .get(async (req, res) => {
                 try {
+                    let url;
                     if (req.query.city) {
-                        const api_response = await axios(`https://api.openweathermap.org/data/2.5/weather?q=${req.query.city}&units=metric&lang=ru&appid=${apiWeatherKey}`)
-                        const data = api_response.data;
-                        const weather_response = {
-                            temp: data.main.temp,
-                            wind: data.wind.speed,
-                            clouds: data.clouds.all,
-                            description: data.weather[0].description,
-                            weather_img_src: `https://openweathermap.org/img/wn/${data.weather[0].icon}@2x.png`,
-                            city: data.name
-
-                        }
-                        res.status(200).json({data: weather_response})
+                        url = `https://api.openweathermap.org/data/2.5/forecast?q=${req.query.city}&cnt=20&units=metric&lang=ru&appid=${apiWeatherKey}`
+                    }
+                    else if (req.query.lat && req.query.lon) {
+                        url = `https://api.openweathermap.org/data/2.5/forecast?lat=${req.query.lat}&lon=${req.query.lon}&cnt=20&units=metric&lang=ru&appid=${apiWeatherKey}`
                     }
                     else {
                         throw new Error()
                     }
+                    const api_response = await axios(url);
+                    const data = api_response.data;
+                    const dataMyAPI = weatherAPIFormat(data);
+                    res.status(200).json({data: dataMyAPI})
                     
                 } catch(e) {
                     res.statusMessage = 'Enter an existing city'

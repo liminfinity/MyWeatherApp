@@ -1,11 +1,14 @@
 import { StrictMode, useState } from "react"
 import axios from 'axios'
-import SearchForm from "./search/SearchForm"
-import WeatherCard from "./WeatherCard"
+import SearchForm from "./Search/SearchForm"
+import WeatherCard from "./Weather/WeatherCard"
 import ErrorMessage from "./ErrorMessage"
 import ControlMessage from "./ControlMessage"
 import styled, {createGlobalStyle, ThemeProvider, keyframes, css} from "styled-components"
 import "./fonts.css"
+import { ErrorContext } from "./Context/ErrorContext"
+import SearchMyWeather from "./Weather/SearchMyWeather"
+import WeatherControl from "./Weather/WeatherControl"
 
 const GlobalStyle = createGlobalStyle`
     *,
@@ -53,8 +56,8 @@ const StyledWeatherCardContainer = styled.section`
 `
 const StyledFooter = styled.footer`
     display: flex;
-    align-items: center;
     justify-content: center;
+    gap: calc(${({theme}) => theme.index} * 2);
 `
 
 const errorOpen = keyframes`
@@ -79,13 +82,13 @@ const StyledError = styled.section`
     min-width: calc(${({theme}) => theme.index} * 15);
     text-align: center;
     ${(props) => props.animation && css`
-        animation: ${errorOpen} 2s forwards;
+        animation: ${errorOpen} 3s forwards;
     `}
 `
 export default function WeatherApp() {
     const [error, setError] = useState(null)
     const [weather, setWeather] = useState(null)
-    async function getWeather(city) {
+    async function getWeatherBySearch(city) {
         try {
             const string_query = new URLSearchParams({city})
             const response = await axios(`http://localhost:5000/weather?${string_query}`)
@@ -95,8 +98,31 @@ export default function WeatherApp() {
             setError({message: "Введите название города"})
             setTimeout(() => {
                 setError(null)
-            }, 2000)
+            }, 3000)
         }
+    }
+    async function getWeatherByCoord() {
+        try {
+            if (navigator?.geolocation) {
+                navigator.geolocation.getCurrentPosition(async (position) => {
+                    
+                    const string_query = new URLSearchParams({
+                        lat: position.coords.latitude,
+                        lon: position.coords.longitude
+                    })
+                    console.log(string_query.toString())
+                    const response = await axios(`http://localhost:5000/weather?${string_query}`)
+                    setWeather(response.data.data)
+                    setError(null)
+                })
+            }
+        } catch(e) {
+            setError({message: "Введите название города"})
+            setTimeout(() => {
+                setError(null)
+            }, 3000)
+        }
+        
     }
     return (
         <>
@@ -109,10 +135,13 @@ export default function WeatherApp() {
                         </StyledError>
                     )}
                     <StyledFooter>
-                        <SearchForm getWeather={getWeather}/>
+                        <ErrorContext.Provider value={error}>
+                            <SearchForm getWeather={getWeatherBySearch}/>
+                        </ErrorContext.Provider>
+                        <SearchMyWeather getWeather={getWeatherByCoord}>Погода в моем городе</SearchMyWeather>
                     </StyledFooter>
                     <StyledWeatherCardContainer>
-                        {weather && <WeatherCard weather={weather}/>}
+                        {weather && <WeatherControl weather_data={weather}></WeatherControl>}
                         {!weather && <ControlMessage>Введите название города</ControlMessage>}
                     </StyledWeatherCardContainer>
                 </StrictMode>

@@ -1,6 +1,6 @@
 import styled, {css} from 'styled-components'
 
-const StyledWeatherCard = styled.div`
+const StyledWeatherCard = styled.li`
     display: grid;
     align-items: center;
     justify-content: center;
@@ -29,7 +29,7 @@ const StyledWeatherCard = styled.div`
     `}
 `
 
-const StyledTitle = styled.h2`
+const StyledTitle = styled.h3`
     grid-area: name;
     text-indent: 40px;
 `
@@ -40,11 +40,21 @@ const StyledInfo = styled.ul`
     grid-area: info;
     list-style: none;
 `
+function isWeatherTomorrow(weather_day) {
+    const currentDay = new Date();
+    currentDay.setDate(currentDay.getDate() + 1);
+    return weather_day === currentDay.toLocaleDateString();
+}
+function isWeatherToday(weather_day) {
+    return weather_day === new Date().toLocaleDateString();
+}
 
 export default function WeatherCard({weather}) {
+    const todayString = isWeatherToday(weather.date) ? ' (Сегодня)' : '';
+    const tomorrowString = isWeatherTomorrow(weather.date) ? ' (Завтра)' : '';
     return (
         <StyledWeatherCard glass>
-            <StyledTitle>{weather.city}</StyledTitle>
+            <StyledTitle>{weather.date + todayString + tomorrowString}</StyledTitle>
             <StyledImg src={weather.weather_img_src}/>
             <StyledInfo>
                 <li>
