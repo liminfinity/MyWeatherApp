@@ -7,8 +7,9 @@ import ControlMessage from "./ControlMessage"
 import styled, {createGlobalStyle, ThemeProvider, keyframes, css} from "styled-components"
 import "./fonts.css"
 import { ErrorContext } from "./Context/ErrorContext"
-import SearchMyWeather from "./Weather/SearchMyWeather"
+import SearchMyWeather from "./Search/SearchMyWeather"
 import WeatherControl from "./Weather/WeatherControl"
+import FilterContainer from "./Filter/FilterContainer"
 
 const GlobalStyle = createGlobalStyle`
     *,
@@ -47,17 +48,26 @@ const theme = {
         hover: {
             background: '#8594d8',
         }
+    },
+    filter: {
+        background: '#92A0DD',
     }
 }
 const StyledWeatherCardContainer = styled.section`
     display: flex;
-    align-items: center;
+    flex-wrap: wrap;
+    align-items: start;
     justify-content: center;
+    gap: calc(${({theme}) => theme.index} * 4);
 `
 const StyledFooter = styled.footer`
     display: flex;
+    align-items: center;
     justify-content: center;
     gap: calc(${({theme}) => theme.index} * 2);
+    @media (max-width: 685px) {
+        flex-direction: column;
+    }
 `
 
 const errorOpen = keyframes`
@@ -88,9 +98,11 @@ const StyledError = styled.section`
 export default function WeatherApp() {
     const [error, setError] = useState(null)
     const [weather, setWeather] = useState(null)
+    const [dateLimit, setDateLimit] = useState(3);
     async function getWeatherBySearch(city) {
         try {
             const string_query = new URLSearchParams({city})
+            string_query.append('cnt', dateLimit);
             const response = await axios(`http://localhost:5000/weather?${string_query}`)
             setWeather(response.data.data)
             setError(null)
@@ -108,7 +120,8 @@ export default function WeatherApp() {
                     
                     const string_query = new URLSearchParams({
                         lat: position.coords.latitude,
-                        lon: position.coords.longitude
+                        lon: position.coords.longitude,
+                        cnt: dateLimit
                     })
                     console.log(string_query.toString())
                     const response = await axios(`http://localhost:5000/weather?${string_query}`)
@@ -143,6 +156,7 @@ export default function WeatherApp() {
                     <StyledWeatherCardContainer>
                         {weather && <WeatherControl weather_data={weather}></WeatherControl>}
                         {!weather && <ControlMessage>Введите название города</ControlMessage>}
+                        <FilterContainer dateLimit={dateLimit} setDateLimit={setDateLimit}></FilterContainer>
                     </StyledWeatherCardContainer>
                 </StrictMode>
             </ThemeProvider>

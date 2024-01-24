@@ -9,18 +9,22 @@ weatherRouter.route('/')
             .get(async (req, res) => {
                 try {
                     let url;
+                    const cnt = req.query.cnt ?? '3';
+                    if (cnt > 5) {
+                        throw new Error()
+                    }
                     if (req.query.city) {
-                        url = `https://api.openweathermap.org/data/2.5/forecast?q=${req.query.city}&cnt=20&units=metric&lang=ru&appid=${apiWeatherKey}`
+                        url = `https://api.openweathermap.org/data/2.5/forecast?q=${req.query.city}&cnt=${cnt * 7}&units=metric&lang=ru&appid=${apiWeatherKey}`
                     }
                     else if (req.query.lat && req.query.lon) {
-                        url = `https://api.openweathermap.org/data/2.5/forecast?lat=${req.query.lat}&lon=${req.query.lon}&cnt=20&units=metric&lang=ru&appid=${apiWeatherKey}`
+                        url = `https://api.openweathermap.org/data/2.5/forecast?lat=${req.query.lat}&lon=${req.query.lon}&cnt=${cnt * 7}&units=metric&lang=ru&appid=${apiWeatherKey}`
                     }
                     else {
                         throw new Error()
                     }
                     const api_response = await axios(url);
                     const data = api_response.data;
-                    const dataMyAPI = weatherAPIFormat(data);
+                    const dataMyAPI = weatherAPIFormat(data, cnt);
                     res.status(200).json({data: dataMyAPI})
                     
                 } catch(e) {

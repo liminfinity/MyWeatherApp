@@ -1,4 +1,4 @@
-module.exports.weatherAPIFormat = function (data) {
+module.exports.weatherAPIFormat = function (data, cntObject) {
     const weather_response = {
         id: data.city.id,
         city: data.city.name,
@@ -24,7 +24,7 @@ module.exports.weatherAPIFormat = function (data) {
                 date: currentDay.toLocaleDateString()
             })
         }
-        if (weather_response.weather.length === 3) break;
+        if (weather_response.weather.length === cntObject) break;
     }
     return weather_response;
 }
