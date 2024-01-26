@@ -1,7 +1,16 @@
-module.exports.weatherAPIFormat = function (data, cntObject) {
+const {launch} = require('puppeteer');
+const {translate} = require('@vitalets/google-translate-api')
+require('dotenv').config()
+const apiWeatherKey = process.env.WEATHER_API_KEY
+module.exports.weatherAPIFormat = async function (data, cntObject) {
+    const isRuLang = /[а-яё]/i;
+    let city = data.city.name;
+    if (!isRuLang.test(city)) {
+        city = await translateAPI(city, 'eng', 'ru');
+    }
     const weather_response = {
         id: data.city.id,
-        city: data.city.name,
+        city,
         weather: []
     }
     for (const weather_one of data.list) {
@@ -24,7 +33,51 @@ module.exports.weatherAPIFormat = function (data, cntObject) {
                 date: currentDay.toLocaleDateString()
             })
         }
-        if (weather_response.weather.length === cntObject) break;
+        if (weather_response.weather.length === +cntObject) break;
     }
     return weather_response;
+}
+async function getRandomCity() {
+    const browser = await launch({
+        headless: 'new'
+    })
+    const page = await browser.newPage();
+    await page.goto('https://randstuff.ru/city/')
+    const city = await page.evaluate(() => {
+        return document.querySelector('#city > div.city-name').innerHTML;
+    })
+    await browser.close();
+    return city;
+}
+module.exports.getCurrentWeatherURL = async (query_string) => {
+    const url = new URL('https://api.openweathermap.org/data/2.5/forecast');
+    const params = url.searchParams;
+    const cnt = query_string.cnt ?? '3';
+    if (cnt > 5) {
+        return;
+    }
+    if (query_string.rand) {
+        const city = await getRandomCity();
+        params.append('q', city);
+    }
+    else if (query_string.city) {
+        params.append('q', query_string.city);
+    }
+    else if (query_string.lat && query_string.lon) {
+        params.append('lat', query_string.lat)
+        params.append('lon', query_string.lon)
+    }
+    else {
+        return;
+    }
+    params.append('units', 'metric');
+    params.append('lang', 'ru');
+    params.append('cnt', cnt * 7);
+    params.append('appid', apiWeatherKey);
+    return url;
+}
+
+async function translateAPI(text, from, to) {
+    const {text: translatedText} = await translate(text, { from: from, to: to});
+    return translatedText;
 }

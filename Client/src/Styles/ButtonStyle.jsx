@@ -12,8 +12,12 @@ export const StyledButton = styled.button`
     &:hover {
         background: ${({theme}) => theme.button.hover.background};
     }
+    &:active {
+        transform: translateY(3px);
+    }
     &:disabled {
         cursor: not-allowed;
         background: #646b88;
     }
+    
 ` 

@@ -1,7 +1,6 @@
-import { StrictMode, useState } from "react"
+import { StrictMode, useEffect, useState } from "react"
 import axios from 'axios'
 import SearchForm from "./Search/SearchForm"
-import WeatherCard from "./Weather/WeatherCard"
 import ErrorMessage from "./ErrorMessage"
 import ControlMessage from "./ControlMessage"
 import styled, {createGlobalStyle, ThemeProvider, keyframes, css} from "styled-components"
@@ -10,6 +9,8 @@ import { ErrorContext } from "./Context/ErrorContext"
 import SearchMyWeather from "./Search/SearchMyWeather"
 import WeatherControl from "./Weather/WeatherControl"
 import FilterContainer from "./Filter/FilterContainer"
+import SearchRandomWeather from "./Search/SearchRandomWeather"
+import Loader from "./Loader"
 
 const GlobalStyle = createGlobalStyle`
     *,
@@ -59,14 +60,19 @@ const StyledWeatherCardContainer = styled.section`
     align-items: start;
     justify-content: center;
     gap: calc(${({theme}) => theme.index} * 4);
+    @media (max-width: 685px) {
+        flex-direction: column;
+        align-items: center;
+    }
 `
 const StyledFooter = styled.footer`
     display: flex;
-    align-items: center;
+    align-items: stretch;
     justify-content: center;
     gap: calc(${({theme}) => theme.index} * 2);
     @media (max-width: 685px) {
         flex-direction: column;
+        align-items: center;
     }
 `
 
@@ -99,43 +105,49 @@ export default function WeatherApp() {
     const [error, setError] = useState(null)
     const [weather, setWeather] = useState(null)
     const [dateLimit, setDateLimit] = useState(3);
-    async function getWeatherBySearch(city) {
+    const [isLoading, setIsLoading] = useState(false);
+
+    async function getWeather(string_query) {
         try {
-            const string_query = new URLSearchParams({city})
-            string_query.append('cnt', dateLimit);
+            setIsLoading(true);
             const response = await axios(`http://localhost:5000/weather?${string_query}`)
             setWeather(response.data.data)
-            setError(null)
+            setError(null) 
         } catch(e) {
             setError({message: "Введите название города"})
             setTimeout(() => {
                 setError(null)
-            }, 3000)
+            }, 2500)
+        } finally {
+            setIsLoading(false);
         }
     }
+    useEffect(() => {
+        getRandomWeather()
+    }, [])
+    async function getWeatherBySearch(city) {
+        const string_query = new URLSearchParams({city})
+        string_query.append('cnt', dateLimit);
+        await getWeather(string_query);
+    }
     async function getWeatherByCoord() {
-        try {
-            if (navigator?.geolocation) {
-                navigator.geolocation.getCurrentPosition(async (position) => {
-                    
-                    const string_query = new URLSearchParams({
-                        lat: position.coords.latitude,
-                        lon: position.coords.longitude,
-                        cnt: dateLimit
-                    })
-                    console.log(string_query.toString())
-                    const response = await axios(`http://localhost:5000/weather?${string_query}`)
-                    setWeather(response.data.data)
-                    setError(null)
-                })
-            }
-        } catch(e) {
-            setError({message: "Введите название города"})
-            setTimeout(() => {
-                setError(null)
-            }, 3000)
-        }
+        setIsLoading(true);
+        navigator.geolocation.getCurrentPosition(async (position) => {
+            const string_query = new URLSearchParams({
+                lat: position.coords.latitude,
+                lon: position.coords.longitude,
+                cnt: dateLimit
+            })
+            await getWeather(string_query)
+            setIsLoading(false);
+        })
         
+    }
+    async function getRandomWeather() {
+        const string_query = new URLSearchParams()
+        string_query.append('rand', 'true');
+        string_query.append('cnt', dateLimit);
+        await getWeather(string_query);
     }
     return (
         <>
@@ -150,10 +162,12 @@ export default function WeatherApp() {
                     <StyledFooter>
                         <ErrorContext.Provider value={error}>
                             <SearchForm getWeather={getWeatherBySearch}/>
+                            {navigator?.geolocation && <SearchMyWeather getWeather={getWeatherByCoord}>Погода в моем городе</SearchMyWeather>}
+                            <SearchRandomWeather getWeather={getRandomWeather}>Погода в случайном городе</SearchRandomWeather>
                         </ErrorContext.Provider>
-                        <SearchMyWeather getWeather={getWeatherByCoord}>Погода в моем городе</SearchMyWeather>
                     </StyledFooter>
                     <StyledWeatherCardContainer>
+                        {isLoading && <Loader/>}
                         {weather && <WeatherControl weather_data={weather}></WeatherControl>}
                         {!weather && <ControlMessage>Введите название города</ControlMessage>}
                         <FilterContainer dateLimit={dateLimit} setDateLimit={setDateLimit}></FilterContainer>
