@@ -53,7 +53,7 @@ export default function WeatherCard({weather}) {
     const todayString = isWeatherToday(weather.date) ? ' (Сегодня)' : '';
     const tomorrowString = isWeatherTomorrow(weather.date) ? ' (Завтра)' : '';
     return (
-        <StyledWeatherCard glass>
+        <StyledWeatherCard glass="true">
             <StyledTitle>{weather.date + todayString + tomorrowString}</StyledTitle>
             <StyledImg src={weather.weather_img_src}/>
             <StyledInfo>

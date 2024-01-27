@@ -52,6 +52,11 @@ const theme = {
     },
     filter: {
         background: '#92A0DD',
+    },
+    range: {
+        track: '#FFF',
+        thumb: '#878686',
+        thumb_hover: '#656464'
     }
 }
 const StyledWeatherCardContainer = styled.section`
