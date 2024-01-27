@@ -17,6 +17,7 @@
 #### 4. Возможность задавать фильтр диапазона даты погоды
 ---
 
+
 ## Используемые технологии
 #### 1. Клиентская часть:
 - react, react-dom
@@ -31,12 +32,8 @@
 #### 1. Адаптивность приложения под любые устройства
 #### 2. Простой и понятный интерфейс
 #### 3. Удобство работы с пользователем (обработка ошибок и их отображение)
-<div style='margin: 0 auto; text-align: center;'>
-    <video controls>
-        <source src="https://github.com/liminfinity/MyWeatherApp/assets/108136720/2a29c6e4-f6ed-414c-9f0e-c9c422cb3210" type="video/webm">
-    </video>
-    <p>Адаптивность приложения</p>
-</div>
+
+[Адаптивность приложения](https://github.com/liminfinity/MyWeatherApp/assets/108136720/4c32b7c3-e437-4935-a62e-3ded4178fd86)
 
 
 
