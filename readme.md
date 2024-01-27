@@ -33,7 +33,7 @@
 #### 3. Удобство работы с пользователем (обработка ошибок и их отображение)
 <div style='margin: 0 auto; text-align: center;'>
     <video controls>
-        <source src="./readmeAssets/adaptive.webm" type="video/webm">
+        <source src="https://github.com/liminfinity/MyWeatherApp/assets/108136720/2a29c6e4-f6ed-414c-9f0e-c9c422cb3210" type="video/webm">
     </video>
     <p>Адаптивность приложения</p>
 </div>
