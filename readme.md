@@ -31,12 +31,11 @@
 #### 1. Адаптивность приложения под любые устройства
 #### 2. Простой и понятный интерфейс
 #### 3. Удобство работы с пользователем (обработка ошибок и их отображение)
-<div style='margin: 0 auto; text-align: center;'>
-    <video controls>
-        <source src="./readmeAssets/adaptive.webm" type="video/webm">
-    </video>
-    <p>Адаптивность приложения</p>
-</div>
+---
+<figure align="center">
+  <img src="readmeAssets/getWeather.png" alt="get weather"/>
+  <figcaption>Главная страница</figcaption>
+</figure>
 
 
 
